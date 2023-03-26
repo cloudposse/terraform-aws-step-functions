@@ -43,7 +43,17 @@ func TestExamplesComplete(t *testing.T) {
 	// Run `terraform output` to get the value of an output variable
 	roleName := terraform.Output(t, terraformOptions, "role_name")
 	// Verify we're getting back the outputs we expect
-	assert.Equal(t, "eg-test-step-function", roleName)
+	assert.Equal(t, "eg-test-step-function-"+randID, roleName)
+
+	// Run `terraform output` to get the value of an output variable
+	stateMachineId := terraform.Output(t, terraformOptions, "state_machine_id")
+	// Verify we're getting back the outputs we expect
+	assert.Contains(t, stateMachineId, "stateMachine:eg-test-step-function-"+randID)
+
+	// Run `terraform output` to get the value of an output variable
+	stateMachineStatus := terraform.Output(t, terraformOptions, "state_machine_status")
+	// Verify we're getting back the outputs we expect
+	assert.Equal(t, "ACTIVE", stateMachineStatus)
 }
 
 func TestExamplesCompleteDisabled(t *testing.T) {
