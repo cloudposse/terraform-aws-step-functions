@@ -41,24 +41,9 @@ func TestExamplesComplete(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	// Run `terraform output` to get the value of an output variable
-	vpcCidr := terraform.Output(t, terraformOptions, "vpc_cidr")
+	roleName := terraform.Output(t, terraformOptions, "role_name")
 	// Verify we're getting back the outputs we expect
-	assert.Equal(t, "172.19.0.0/16", vpcCidr)
-
-	// Run `terraform output` to get the value of an output variable
-	domains := terraform.OutputMap(t, terraformOptions, "domains")
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, 3, len(domains))
-
-	// Run `terraform output` to get the value of an output variable
-	ruleGroups := terraform.OutputMap(t, terraformOptions, "rule_groups")
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, 2, len(ruleGroups))
-
-	// Run `terraform output` to get the value of an output variable
-	rules := terraform.OutputMap(t, terraformOptions, "rules")
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, 3, len(rules))
+	assert.Equal(t, "eg-test-step-function", roleName)
 }
 
 func TestExamplesCompleteDisabled(t *testing.T) {
