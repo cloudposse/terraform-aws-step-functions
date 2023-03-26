@@ -50,7 +50,7 @@ references:
   - name: "Amazon States Language"
     description: "Overview of Amazon States Language"
     url: "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html"
-  - name: "Resource: aws_sfn_state_machine"
+  - name: "Resource 'aws_sfn_state_machine'"
     description: "Terraform 'aws_sfn_state_machine' resource"
     url: "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine"
 

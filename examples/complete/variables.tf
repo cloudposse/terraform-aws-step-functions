@@ -9,11 +9,6 @@ variable "step_function_name" {
   default     = null
 }
 
-variable "definition" {
-  type        = map(string)
-  description = "The Amazon States Language definition for the Step Function. Refer to https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html for more details"
-}
-
 variable "tracing_enabled" {
   type        = bool
   description = "When set to true, AWS X-Ray tracing is enabled. Make sure the State Machine has the correct IAM policies for logging"
@@ -35,12 +30,6 @@ variable "existing_aws_cloudwatch_log_group_arn" {
   type        = string
   description = "The Amazon Resource Name (ARN) of the existing CloudWatch Log Group to use for the Step Function. If not provided, a new CloudWatch Log Group will be created"
   default     = null
-}
-
-variable "logging_configuration" {
-  type        = map(string)
-  description = "Defines what execution history events are logged and where they are logged"
-  default     = {}
 }
 
 variable "cloudwatch_log_group_name" {
@@ -95,29 +84,4 @@ variable "role_permissions_boundary" {
   type        = string
   description = "The ARN of the policy that is used to set the permissions boundary for the created IAM role"
   default     = null
-}
-
-variable "iam_policies" {
-  type = map(object({
-    effect        = string
-    actions       = optional(list(string))
-    not_actions   = optional(list(string))
-    resources     = optional(list(string))
-    not_resources = optional(list(string))
-    principals = optional(list(object({
-      type        = string
-      identifiers = list(string)
-    })))
-    not_principals = optional(list(object({
-      type        = string
-      identifiers = list(string)
-    })))
-    condition = optional(list(object({
-      test     = string
-      variable = string
-      values   = list(string)
-    })))
-  }))
-  description = "IAM policies to attach to the created IAM role for the Step Function. The map keys will be used as the policy SIDs"
-  default     = {}
 }

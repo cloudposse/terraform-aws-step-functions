@@ -33,9 +33,16 @@ variable "existing_aws_cloudwatch_log_group_arn" {
 }
 
 variable "logging_configuration" {
-  type        = map(string)
+  type = object({
+    log_destination        = optional(string)
+    include_execution_data = bool
+    level                  = string
+  })
   description = "Defines what execution history events are logged and where they are logged"
-  default     = {}
+  default = {
+    include_execution_data = false
+    level                  = "OFF"
+  }
 }
 
 variable "cloudwatch_log_group_name" {
