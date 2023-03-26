@@ -1,0 +1,198 @@
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: terraform-aws-step-functions
+# Tags of this project
+tags:
+  - aws
+  - terraform
+  - terraform-modules
+  - workflow
+  - step-function
+  - state
+  - state-machine
+  - task
+  - activity
+
+# Categories of this project
+categories:
+  - terraform-modules/step-function
+  - terraform-modules/state-machine
+
+# Logo for this project
+#logo: docs/logo.png
+
+# License of this project
+license: "APACHE2"
+
+# Canonical GitHub repo
+github_repo: cloudposse/terraform-aws-step-functions
+
+# Badges to display
+badges:
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/terraform-aws-step-functions.svg"
+    url: "https://github.com/cloudposse/terraform-aws-step-functions/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+references:
+  - name: "What is AWS Step Functions?"
+    description: "AWS Step Functions overview"
+    url: "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+  - name: "IAM Policies for integrated services"
+    description: "Overview of Step Functions IAM Policies for integrated services"
+    url: "https://docs.aws.amazon.com/step-functions/latest/dg/service-integration-iam-templates.html"
+  - name: "Amazon States Language"
+    description: "Overview of Amazon States Language"
+    url: "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html"
+  - name: "Resource: aws_sfn_state_machine"
+    description: "Terraform 'aws_sfn_state_machine' resource"
+    url: "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine"
+
+
+# Short description of this project
+description: |-
+  Terraform module to provision Route 53 Resolver DNS Firewall, domain lists, firewall rules, rule groups, and logging configurations.
+
+# How to use this project
+usage: |2-
+
+  For a complete example, see [examples/complete](examples/complete)
+
+  For automated tests of the complete example using [bats](https://github.com/bats-core/bats-core) and [Terratest](https://github.com/gruntwork-io/terratest) (which tests and deploys the example on AWS), see [test](test).
+
+  ```hcl
+  provider "aws" {
+    region = var.region
+  }
+
+  module "vpc" {
+    source  = "cloudposse/vpc/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version     = "x.x.x"
+
+    ipv4_primary_cidr_block                   = "172.19.0.0/16"
+    dns_hostnames_enabled                     = true
+    dns_support_enabled                       = true
+    internet_gateway_enabled                  = false
+    ipv6_egress_only_internet_gateway_enabled = false
+    assign_generated_ipv6_cidr_block          = false
+
+    context = module.this.context
+  }
+
+  module "s3_log_storage" {
+    source  = "cloudposse/s3-log-storage/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version     = "x.x.x"
+
+    force_destroy = true
+    attributes    = ["logs"]
+
+    context = module.this.context
+  }
+
+  module "route53_resolver_firewall" {
+    # Cloud Posse recommends pinning every module to a specific version
+    # version     = "x.x.x"
+
+    vpc_id = module.vpc.vpc_id
+
+    firewall_fail_open        = "ENABLED"
+    query_log_enabled         = true
+    query_log_destination_arn = module.s3_log_storage.bucket_arn
+
+    domains_config = {
+      "not-secure-domains" = {
+        # The dot at the end of domain names is required by Route53 DNS Firewall
+        # If not added, AWS adds it automatically and terraform shows permanent drift
+        domains = [
+          "not-secure-domain-1.com.",
+          "not-secure-domain-2.com.",
+          "not-secure-domain-3.com."
+        ]
+      },
+      "alert-domains" = {
+        domains = [
+          "alert-domain-1.com.",
+          "alert-domain-2.com.",
+          "alert-domain-3.com."
+        ]
+      },
+      "blacklisted-domains" = {
+        # Concat the lists of domains passed in the `domains` field and loaded from the file `domains_file`
+        domains = [
+          "blacklisted-domain-1.com.",
+          "blacklisted-domain-2.com.",
+          "blacklisted-domain-3.com."
+        ]
+        domains_file = "config/blacklisted_domains.txt"
+      }
+    }
+
+    rule_groups_config = {
+      "not-secure-domains-rule-group" = {
+        # 'priority' must be between 100 and 9900 exclusive
+        priority = 101
+        rules = {
+          "block-not-secure-domains" = {
+            # 'priority' must be between 100 and 9900 exclusive
+            priority                  = 101
+            firewall_domain_list_name = "not-secure-domains"
+            action                    = "BLOCK"
+            block_response            = "NXDOMAIN"
+          }
+        }
+      },
+      "alert-and-blacklisted-domains-rule-group" = {
+        # 'priority' must be between 100 and 9900 exclusive
+        priority = 200
+        rules = {
+          "alert-domains" = {
+            # 'priority' must be between 100 and 9900 exclusive
+            priority                  = 101
+            firewall_domain_list_name = "alert-domains"
+            action                    = "ALERT"
+          },
+          "block-and-override-blacklisted-domains" = {
+            # 'priority' must be between 100 and 9900 exclusive
+            priority                  = 200
+            firewall_domain_list_name = "blacklisted-domains"
+            action                    = "BLOCK"
+            block_response            = "OVERRIDE"
+            block_override_dns_type   = "CNAME"
+            block_override_domain     = "go-here.com"
+            block_override_ttl        = 1
+          }
+        }
+      }
+    }
+
+    context = module.this.context
+  }
+  ```
+
+# Example usage
+#examples: |-
+#  Example goes here...
+
+# How to get started quickly
+#quickstart: |-
+#  Here's how to get started...
+
+# Other files to include in this README from the project folder
+include:
+  - "docs/targets.md"
+  - "docs/terraform.md"
+
+# Contributors to this project
+contributors:
+  - name: "Erik Osterman"
+    github: "osterman"
+  - name: "Andriy Knysh"
+    github: "aknysh"
