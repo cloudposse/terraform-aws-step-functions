@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.region
-}
-
 locals {
   enabled = module.this.enabled
 
@@ -11,6 +7,7 @@ locals {
   }
 
   # https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html
+  # https://docs.aws.amazon.com/step-functions/latest/dg/connect-parameters.html
   definition = {
     "Comment" = "Test Step Function"
     "StartAt" = "Hello"
@@ -23,7 +20,27 @@ locals {
       "World" = {
         "Type"   = "Pass"
         "Result" = "World"
-        "End"    = true
+        "Next"   = "Send message to SQS"
+      },
+      # https://docs.aws.amazon.com/step-functions/latest/dg/connect-sqs.html
+      "Send message to SQS" = {
+        "Type"     = "Task"
+        "Resource" = "arn:aws:states:::sqs:sendMessage"
+        "Parameters" = {
+          "QueueUrl"    = local.enabled ? aws_sqs_queue.default[0].url : ""
+          "MessageBody" = "Hello World"
+        }
+        "Next" = "Publish to SNS"
+      }
+      # https://docs.aws.amazon.com/step-functions/latest/dg/connect-sns.html
+      "Publish to SNS" = {
+        "Type"     = "Task",
+        "Resource" = "arn:aws:states:::sns:publish"
+        "Parameters" = {
+          "TopicArn" = module.sns.sns_topic_arn
+          "Message"  = "Hello World"
+        }
+        "End" = true
       }
     }
   }

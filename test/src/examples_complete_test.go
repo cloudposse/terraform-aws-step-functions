@@ -1,12 +1,13 @@
 package test
 
 import (
+	"strings"
+	"testing"
+
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	testStructure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/assert"
-	"strings"
-	"testing"
 )
 
 // Test the Terraform module in examples/complete using Terratest.

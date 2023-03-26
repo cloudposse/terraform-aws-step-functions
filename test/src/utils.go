@@ -1,10 +1,11 @@
 package test
 
 import (
-	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
 )
 
 func cleanup(t *testing.T, terraformOptions *terraform.Options, tempTestFolder string) {
