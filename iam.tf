@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "assume_role" {
 
     principals {
       type        = "Service"
-      identifiers = "states.${local.aws_region}.amazonaws.com"
+      identifiers = ["states.${local.aws_region}.amazonaws.com"]
     }
   }
 }
@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "default" {
       not_resources = lookup(statement.value, "not_resources", [])
 
       dynamic "principals" {
-        for_each = lookup(statement.value, "principals", [])
+        for_each = lookup(statement.value, "principals", null) != null ? statement.value.principals : []
 
         content {
           identifiers = principals.value.identifiers
@@ -61,7 +61,7 @@ data "aws_iam_policy_document" "default" {
       }
 
       dynamic "not_principals" {
-        for_each = lookup(statement.value, "not_principals", [])
+        for_each = lookup(statement.value, "not_principals", null) != null ? statement.value.not_principals : []
 
         content {
           identifiers = not_principals.value.identifiers
@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "default" {
       }
 
       dynamic "condition" {
-        for_each = lookup(statement.value, "condition", [])
+        for_each = lookup(statement.value, "condition", null) != null ? statement.value.condition : []
 
         content {
           test     = condition.value.test

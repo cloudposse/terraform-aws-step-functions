@@ -5,7 +5,7 @@ variable "step_function_name" {
 }
 
 variable "definition" {
-  type        = map(string)
+  type        = any
   description = "The Amazon States Language definition for the Step Function. Refer to https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html for more details"
 }
 
