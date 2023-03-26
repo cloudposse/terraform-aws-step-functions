@@ -16,7 +16,7 @@ resource "aws_sfn_state_machine" "default" {
     for_each = local.logging_enabled ? [true] : []
 
     content {
-      log_destination        = lookup(var.logging_configuration, "log_destination", "${local.cloudwatch_log_group_arn}:*")
+      log_destination        = lookup(var.logging_configuration, "log_destination", null) != null ? lookup(var.logging_configuration, "log_destination") : "${local.cloudwatch_log_group_arn}:*"
       include_execution_data = lookup(var.logging_configuration, "include_execution_data", null)
       level                  = lookup(var.logging_configuration, "level", null)
     }
