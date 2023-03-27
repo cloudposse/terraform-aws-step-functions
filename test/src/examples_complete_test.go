@@ -31,7 +31,6 @@ func TestExamplesComplete(t *testing.T) {
 		VarFiles: varFiles,
 		Vars: map[string]interface{}{
 			"attributes": attributes,
-			"enabled":    true,
 		},
 	}
 
