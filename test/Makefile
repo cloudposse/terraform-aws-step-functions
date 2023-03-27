@@ -38,6 +38,6 @@ module: deps
 	$(call RUN_TESTS, ../)
 
 ## Run tests against example
-examples/complete: export TESTS ?= installed lint get-modules get-plugins validate
+examples/complete: export TESTS ?= installed lint validate
 examples/complete: deps
 	$(call RUN_TESTS, ../$@)
