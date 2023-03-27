@@ -1,6 +1,6 @@
 locals {
   create_role      = local.enabled && (var.existing_iam_role_arn == null || var.existing_iam_role_arn == "")
-  role_arn         = local.create_role ? aws_iam_role.default[0].arn : var.existing_iam_role_arn
+  role_arn         = local.create_role ? one(aws_iam_role.default[*].arn) : var.existing_iam_role_arn
   role_name        = var.role_name != null && var.role_name != "" ? var.role_name : module.this.id
   role_description = var.role_description != null && var.role_description != "" ? var.role_description : local.role_name
   aws_region       = one(data.aws_region.current[*].name)
