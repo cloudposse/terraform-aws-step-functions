@@ -86,5 +86,8 @@ func TestExamplesCompleteDisabled(t *testing.T) {
 	results := terraform.InitAndApply(t, terraformOptions)
 
 	// Should complete successfully without creating or changing any resources
-	assert.Contains(t, results, "Resources: 0 added, 0 changed, 0 destroyed.")
+	// Extract the "Resources:" section of the output to make the error message more readable.
+	re := regexp.MustCompile(`Resources: [^.]+\.`)
+	match := re.FindString(results)
+	assert.Equal(t, "Resources: 0 added, 0 changed, 0 destroyed.", match, "Deploying with `enabled = false` should not create any resources.")
 }
