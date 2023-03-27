@@ -1,0 +1,208 @@
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: terraform-aws-step-functions
+# Tags of this project
+tags:
+  - aws
+  - terraform
+  - terraform-modules
+  - workflow
+  - step-function
+  - state
+  - state-machine
+  - task
+  - activity
+
+# Categories of this project
+categories:
+  - terraform-modules/step-function
+  - terraform-modules/state-machine
+
+# Logo for this project
+#logo: docs/logo.png
+
+# License of this project
+license: "APACHE2"
+
+# Canonical GitHub repo
+github_repo: cloudposse/terraform-aws-step-functions
+
+# Badges to display
+badges:
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/terraform-aws-step-functions.svg"
+    url: "https://github.com/cloudposse/terraform-aws-step-functions/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related:
+  - name: "terraform-aws-sns-topic"
+    description: "Terraform module to provision an Amazon Simple Notification Service (SNS)"
+    url: "https://github.com/cloudposse/terraform-aws-sns-topic"
+  - name: "terraform-aws-lambda-function"
+    description: "Terraform module to provision AWS Lambda Functions"
+    url: "https://github.com/cloudposse/terraform-aws-lambda-function"
+
+references:
+  - name: "What is AWS Step Functions?"
+    description: "AWS Step Functions overview"
+    url: "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+  - name: "IAM Policies for integrated services"
+    description: "Overview of Step Functions IAM Policies for integrated services"
+    url: "https://docs.aws.amazon.com/step-functions/latest/dg/service-integration-iam-templates.html"
+  - name: "Amazon States Language"
+    description: "Overview of Amazon States Language"
+    url: "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html"
+  - name: "Resource 'aws_sfn_state_machine'"
+    description: "Terraform 'aws_sfn_state_machine' resource"
+    url: "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine"
+
+
+# Short description of this project
+description: |-
+  Terraform module to provision [AWS Step Functions](https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html).
+
+# How to use this project
+usage: |2-
+
+  For a complete example, see [examples/complete](examples/complete)
+
+  For automated tests of the complete example using [bats](https://github.com/bats-core/bats-core) and [Terratest](https://github.com/gruntwork-io/terratest) (which tests and deploys the example on AWS), see [test](test).
+
+  ```hcl
+    locals {
+      enabled = module.this.enabled
+
+      logging_configuration = {
+        include_execution_data = true
+        level                  = "ALL"
+      }
+
+      # https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html
+      # https://docs.aws.amazon.com/step-functions/latest/dg/connect-parameters.html
+      definition = {
+        "Comment" = "Test Step Function"
+        "StartAt" = "Hello"
+        "States" = {
+          "Hello" = {
+            "Type"   = "Pass"
+            "Result" = "Hello"
+            "Next"   = "World"
+          },
+          "World" = {
+            "Type"   = "Pass"
+            "Result" = "World"
+            "Next"   = "Send message to SQS"
+          },
+          # https://docs.aws.amazon.com/step-functions/latest/dg/connect-sqs.html
+          "Send message to SQS" = {
+            "Type"     = "Task"
+            "Resource" = "arn:aws:states:::sqs:sendMessage"
+            "Parameters" = {
+              "QueueUrl"    = local.enabled ? aws_sqs_queue.default[0].url : ""
+              "MessageBody" = "Hello World"
+            }
+            "Next" = "Publish to SNS"
+          }
+          # https://docs.aws.amazon.com/step-functions/latest/dg/connect-sns.html
+          "Publish to SNS" = {
+            "Type"     = "Task",
+            "Resource" = "arn:aws:states:::sns:publish"
+            "Parameters" = {
+              "TopicArn" = module.sns.sns_topic_arn
+              "Message"  = "Hello World"
+            }
+            "End" = true
+          }
+        }
+      }
+
+      iam_policies = {
+        # https://docs.aws.amazon.com/step-functions/latest/dg/sns-iam.html
+        "SnsAllowPublish" = {
+          effect = "Allow"
+          actions = [
+            "sns:Publish"
+          ]
+          resources = [
+            module.sns.sns_topic_arn
+          ]
+        }
+
+        # https://docs.aws.amazon.com/step-functions/latest/dg/sqs-iam.html
+        "SqsAllowSendMessage" = {
+          effect = "Allow"
+          actions = [
+            "sqs:SendMessage"
+          ]
+          resources = [
+            local.enabled ? aws_sqs_queue.default[0].arn : ""
+          ]
+        }
+      }
+    }
+
+    module "step_function" {
+      source = "cloudposse/step-functions/aws"
+      # Cloud Posse recommends pinning every module to a specific version
+      version = "x.x.x"
+
+      type                                   = "EXPRESS"
+      tracing_enabled                        = true
+      logging_configuration                  = local.logging_configuration
+      definition                             = local.definition
+      iam_policies                           = local.iam_policies
+
+      context = module.this.context
+    }
+
+    module "sns" {
+      source  = "cloudposse/sns-topic/aws"
+      version = "0.20.2"
+
+      sqs_dlq_enabled    = true
+      fifo_topic         = true
+      fifo_queue_enabled = true
+
+      context = module.this.context
+    }
+
+    resource "aws_sqs_queue" "default" {
+      count = local.enabled ? 1 : 0
+
+      name                       = module.this.id
+      fifo_queue                 = false
+      visibility_timeout_seconds = 30
+      message_retention_seconds  = 86400
+      max_message_size           = 2048
+      delay_seconds              = 90
+      receive_wait_time_seconds  = 10
+
+      tags = module.this.tags
+    }
+  ```
+
+# Example usage
+#examples: |-
+#  Example goes here...
+
+# How to get started quickly
+#quickstart: |-
+#  Here's how to get started...
+
+# Other files to include in this README from the project folder
+include:
+  - "docs/targets.md"
+  - "docs/terraform.md"
+
+# Contributors to this project
+contributors:
+  - name: "Erik Osterman"
+    github: "osterman"
+  - name: "Andriy Knysh"
+    github: "aknysh"
