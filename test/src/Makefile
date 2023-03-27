@@ -27,4 +27,3 @@ docker/test:
 ## Clean up files
 clean:
 	rm -rf ../../examples/complete/*.tfstate* ../../examples/complete/.terraform.lock.hcl
-
