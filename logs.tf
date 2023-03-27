@@ -1,7 +1,7 @@
 locals {
   logging_enabled                 = local.enabled && try(var.logging_configuration["level"], null) != null && try(var.logging_configuration["level"], "OFF") != "OFF"
   create_aws_cloudwatch_log_group = local.enabled && (var.existing_aws_cloudwatch_log_group_arn == null || var.existing_aws_cloudwatch_log_group_arn == "")
-  cloudwatch_log_group_arn        = local.create_aws_cloudwatch_log_group ? aws_cloudwatch_log_group.logs[0].arn : var.existing_aws_cloudwatch_log_group_arn
+  cloudwatch_log_group_arn        = local.create_aws_cloudwatch_log_group ? one(aws_cloudwatch_log_group.logs[*].arn) : var.existing_aws_cloudwatch_log_group_arn
   cloudwatch_log_name             = var.cloudwatch_log_group_name != null && var.cloudwatch_log_group_name != "" ? var.cloudwatch_log_group_name : module.logs_label.id
 }
 
