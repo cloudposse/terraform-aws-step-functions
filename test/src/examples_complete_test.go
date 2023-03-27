@@ -1,6 +1,7 @@
 package test
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
