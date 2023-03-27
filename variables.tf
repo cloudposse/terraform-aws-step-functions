@@ -22,7 +22,7 @@ variable "type" {
 
   validation {
     condition     = contains(["STANDARD", "EXPRESS"], upper(var.type))
-    error_message = "Step Function type must STANDARD or EXPRESS."
+    error_message = "Step Function type must be either STANDARD or EXPRESS."
   }
 }
 
