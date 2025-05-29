@@ -33,13 +33,17 @@ github_repo: cloudposse/terraform-aws-step-functions
 
 # Badges to display
 badges:
-  - name: "Latest Release"
-    image: "https://img.shields.io/github/release/cloudposse/terraform-aws-step-functions.svg"
-    url: "https://github.com/cloudposse/terraform-aws-step-functions/releases/latest"
-  - name: "Slack Community"
-    image: "https://slack.cloudposse.com/badge.svg"
-    url: "https://slack.cloudposse.com"
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudposse/terraform-aws-step-functions.svg?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-aws-step-functions/releases/latest
+  - name: Last Updated
+    image: https://img.shields.io/github/last-commit/cloudposse/terraform-aws-step-functions.svg?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-aws-step-functions/commits
+  - name: Slack Community
+    image: https://slack.cloudposse.com/for-the-badge.svg
+    url: https://cloudposse.com/slack
 
+# List any related terraform modules that this module may be used with or that this module depends on.
 related:
   - name: "terraform-aws-sns-topic"
     description: "Terraform module to provision an Amazon Simple Notification Service (SNS)"
@@ -196,13 +200,5 @@ usage: |2-
 #  Here's how to get started...
 
 # Other files to include in this README from the project folder
-include:
-  - "docs/targets.md"
-  - "docs/terraform.md"
-
-# Contributors to this project
-contributors:
-  - name: "Erik Osterman"
-    github: "osterman"
-  - name: "Andriy Knysh"
-    github: "aknysh"
+include: []
+contributors: []
